@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import React, { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   LineChart,
@@ -12,22 +13,47 @@ import {
 import { Calendar, Clock, Settings, AlertTriangle } from "lucide-react";
 
 const FactorySuggestPage = () => {
-  const [maintenanceSchedule] = useState([
-    { date: "2024-11-15", type: "định kỳ", duration: "4h", impact: "Low" },
-    {
-      date: "2024-11-20",
-      type: "phòng ngừa",
-      duration: "8h",
-      impact: "Medium",
-    },
-    { date: "2024-12-01", type: "quan trọng", duration: "24h", impact: "High" },
-  ]);
+  const searchParams = useSearchParams();
+  const startDateStr = searchParams.get("start") || new Date().toISOString().split("T")[0];
 
-  const efficiencyData = [
-    { date: "10/11/2024", efficiency: 92, uptime: 98 },
-    { date: "11/11/2024", efficiency: 89, uptime: 97 },
-    { date: "12/11/2024", efficiency: 94, uptime: 99 },
-  ];
+  const addDays = (date: Date, days: number) => {
+    const d = new Date(date);
+    d.setDate(d.getDate() + days);
+    return d;
+  };
+
+  const formatDate = (d: Date) => {
+    const day = `${d.getDate()}`.padStart(2, "0");
+    const month = `${d.getMonth() + 1}`.padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  const { efficiencyData, maintenanceSchedule, nextMaintenanceInDays } = useMemo(() => {
+    const start = new Date(startDateStr);
+    const eff = [
+      { date: formatDate(start), efficiency: 92, uptime: 98 },
+      { date: formatDate(addDays(start, 1)), efficiency: 89, uptime: 97 },
+      { date: formatDate(addDays(start, 2)), efficiency: 94, uptime: 99 },
+    ];
+
+    const maintenance = [
+      { date: addDays(start, 3), type: "định kỳ", duration: "4h", impact: "Low" },
+      { date: addDays(start, 8), type: "phòng ngừa", duration: "8h", impact: "Medium" },
+      { date: addDays(start, 15), type: "quan trọng", duration: "24h", impact: "High" },
+    ].map((item) => ({ ...item, dateLabel: formatDate(item.date) }));
+
+    const today = start;
+    const nextMaint = maintenance[0].date;
+    const diffMs = nextMaint.getTime() - today.getTime();
+    const diffDays = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+
+    return {
+      efficiencyData: eff,
+      maintenanceSchedule: maintenance,
+      nextMaintenanceInDays: diffDays,
+    };
+  }, [startDateStr]);
 
   return (
     <div className="space-y-4">
@@ -67,7 +93,7 @@ const FactorySuggestPage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">3 days</div>
+            <div className="text-2xl font-bold text-orange-600">{nextMaintenanceInDays} days</div>
             <p className="text-xs text-gray-500">Kiểm tra định kỳ</p>
           </CardContent>
         </Card>
@@ -122,7 +148,7 @@ const FactorySuggestPage = () => {
               >
                 <div>
                   <p className="font-medium">Bảo trì {schedule.type}</p>
-                  <p className="text-sm text-gray-500">{schedule.date}</p>
+                  <p className="text-sm text-gray-500">{schedule.dateLabel}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-medium">{schedule.duration}</p>

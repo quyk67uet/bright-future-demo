@@ -12,7 +12,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-const TimelinePredictionChart = ({ title }: { title: string }) => {
+const TimelinePredictionChart = ({ title, startDate }: { title: string; startDate?: string }) => {
   // Generate hourly data - hợp lý với chu kỳ mặt trời (cao nhất vào giữa trưa)
   const hourlyData = Array.from({ length: 24 }, (_, i) => {
     // Mô phỏng đường cong năng lượng mặt trời: thấp vào sáng sớm/tối, cao vào giữa trưa
@@ -30,11 +30,11 @@ const TimelinePredictionChart = ({ title }: { title: string }) => {
     };
   });
 
-  // Daily data - 7 ngày từ 14/1/2026
-  const startDate = new Date('2026-01-14');
+  // Daily data - 7 ngày từ ngày bắt đầu gửi form
+  const baseDate = startDate ? new Date(startDate) : new Date();
   const dailyData = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(startDate);
-    date.setDate(startDate.getDate() + i);
+    const date = new Date(baseDate);
+    date.setDate(baseDate.getDate() + i);
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     return {
       time: dayNames[date.getDay()],

@@ -1,4 +1,4 @@
-import Button from "../button/ Button";
+import Button from "../button/Button";
 const Section5 = () => {
   return (
     <div className="bg-[url('/images/solar-energy.jpg')] bg-cover h-[241px] flex flex-col items-center justify-center">

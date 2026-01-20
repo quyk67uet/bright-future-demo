@@ -13,7 +13,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const Factory = () => {
   interface Request {
@@ -32,6 +32,7 @@ const Factory = () => {
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const fetchForecastData = async (
     forecastRequest: Request
@@ -199,13 +200,17 @@ const Factory = () => {
           </div>
           {forecastData && (
             <div className="text-center mt-4">
-              <Link href="/consulting/factory">
-                <Button className="mt-[15px] bg-orange-500 hover:bg-orange-600">
-                  <span className="flex items-center gap-2 font">
-                    Tư vấn ngay
-                  </span>
-                </Button>
-              </Link>
+              <Button
+                className="mt-[15px] bg-orange-500 hover:bg-orange-600"
+                onClick={() => {
+                  const today = new Date().toISOString().split("T")[0];
+                  router.push(`/consulting/factory?start=${today}`);
+                }}
+              >
+                <span className="flex items-center gap-2 font">
+                  Tư vấn ngay
+                </span>
+              </Button>
             </div>
           )}
         </CardContent>

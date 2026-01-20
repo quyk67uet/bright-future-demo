@@ -65,9 +65,11 @@ const FormSolar = ({ link, selectedPanel }: { link: string; selectedPanel?: any 
     
     // Thêm delay để hiển thị loading
     await new Promise(resolve => setTimeout(resolve, 3000));
+
+    const startDate = new Date().toISOString().split("T")[0];
     
     router.push(
-      `${link}?address=${address}&capacity=${capacity}&lat=${lat}&lon=${lon}&tilt=${tilt}&model=${model}&azimuth=${azimuth}&pr=${pr}`
+      `${link}?address=${address}&capacity=${capacity}&lat=${lat}&lon=${lon}&tilt=${tilt}&model=${model}&azimuth=${azimuth}&pr=${pr}&startDate=${startDate}`
     );
   };
 

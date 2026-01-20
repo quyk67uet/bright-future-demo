@@ -4,23 +4,25 @@ interface SolarDataTableProps {
   title: string;
   column: string;
   unit: string;
+  startDate?: string; // YYYY-MM-DD, defaults to today
 }
 export default function SolarDataTable({
   title,
   column,
   unit,
+  startDate,
 }: SolarDataTableProps) {
   const [viewType, setViewType] = useState("daily");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Generate data từ ngày hiện tại (14/1/2026) - Sample data
+  // Generate data từ ngày bắt đầu người dùng gửi form
   const generateDailyData = () => {
-    const startDate = new Date('2026-01-14');
+    const base = startDate ? new Date(startDate) : new Date();
     const data = [];
     for (let i = 0; i < 13; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
+      const date = new Date(base);
+      date.setDate(base.getDate() + i);
       const dateStr = date.toISOString().split('T')[0];
       // Giá trị hợp lý cho tháng 1 ở Việt Nam (mùa khô, ít mây)
       const baseIrradiation = 400 + Math.random() * 300; // 400-700 kWh/m2
@@ -40,20 +42,31 @@ export default function SolarDataTable({
   const dailyData = generateDailyData();
 
   // Monthly data cho năm 2026 - hợp lý với khí hậu Việt Nam
-  const monthlyData = [
-    { time: "January 2026", irradiation: 420, output: 34, efficiency: 92.5 },
-    { time: "February 2026", irradiation: 480, output: 39, efficiency: 93.2 },
-    { time: "March 2026", irradiation: 650, output: 55, efficiency: 95.1 },
-    { time: "April 2026", irradiation: 720, output: 62, efficiency: 95.8 },
-    { time: "May 2026", irradiation: 800, output: 70, efficiency: 96.2 },
-    { time: "June 2026", irradiation: 850, output: 75, efficiency: 96.5 },
-    { time: "July 2026", irradiation: 820, output: 72, efficiency: 96.3 },
-    { time: "August 2026", irradiation: 780, output: 68, efficiency: 95.9 },
-    { time: "September 2026", irradiation: 700, output: 60, efficiency: 95.4 },
-    { time: "October 2026", irradiation: 600, output: 50, efficiency: 94.5 },
-    { time: "November 2026", irradiation: 500, output: 42, efficiency: 93.8 },
-    { time: "December 2026", irradiation: 450, output: 37, efficiency: 93.0 },
-  ];
+  const monthlyData = (() => {
+    const base = startDate ? new Date(startDate) : new Date();
+    const year = base.getFullYear();
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const seasonal = [420, 480, 650, 720, 800, 850, 820, 780, 700, 600, 500, 450];
+    return monthNames.map((name, idx) => ({
+      time: `${name} ${year}`,
+      irradiation: seasonal[idx],
+      output: Math.round(seasonal[idx] * 0.08),
+      efficiency: 92 + Math.random() * 5,
+    }));
+  })();
 
   const currentData = viewType === "daily" ? dailyData : monthlyData;
 
